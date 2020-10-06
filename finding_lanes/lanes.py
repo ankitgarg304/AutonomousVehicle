@@ -36,7 +36,7 @@ def average_slope_intercept(image, lines):
 def canny(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) # converting color image to grayscale
     blur = cv2.GaussianBlur(gray, (5,5), 0) # Reducing noise and smoothen the image
-    canny = cv2.Canny(gray, 50, 150) # to determine simple edge detection in our image
+    canny = cv2.Canny(blur, 50, 150) # to determine simple edge detection in our image
     return canny
 
 # Hough transform: To identify the straight lines in the image hence line detection
@@ -73,15 +73,18 @@ def region_of_interest(image): # idea behind this function is to show the specif
 # Instead of image now performing lane detection on the video
 cap = cv2.VideoCapture("test2.mp4")
 while(cap.isOpened()):
-    _, frame = cap.read()
-    canny_image = canny(frame)
-    cropped_canny = region_of_interest(canny_image)
-    lines = cv2.HoughLinesP(cropped_canny, 2, np.pi/180, 100, np.array([]), minLineLength=40,maxLineGap=5)
-    averaged_lines = average_slope_intercept(frame, lines)
-    line_image = display_lines(frame, averaged_lines)
-    combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
-    cv2.imshow("result", combo_image)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    ret, frame = cap.read()
+    if ret == True:
+        canny_image = canny(frame)
+        cropped_canny = region_of_interest(canny_image)
+        lines = cv2.HoughLinesP(cropped_canny, 2, np.pi/180, 100, np.array([]), minLineLength=40,maxLineGap=5)
+        averaged_lines = average_slope_intercept(frame, lines)
+        line_image = display_lines(frame, averaged_lines)
+        combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
+        cv2.imshow("result", combo_image)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    else:
         break
 cap.release()
 cv2.destroyAllWindows()
